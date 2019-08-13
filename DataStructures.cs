@@ -515,5 +515,134 @@ public class ChainingHashTable<K, V>
     }
 }
 
+public class GraphNode <T>
+    {
+      T value;
+      List<GraphNode<T>> neighbors;
+
+      public T Value{get{return value;}}
+      public IList<GraphNode<T>> Neighbors{get{return neighbors.AsReadOnly();}}
+      public bool AddNeighbor(GraphNode<T> neighbor)
+      {
+        if(neighbors.Contains(neighbor))
+        {
+          return false;
+        }
+        else
+        {
+            neighbors.Add(neighbor);
+            return true;
+        }
+      }
+      public bool RemoveNeighbor(GraphNode<T> neighbor)
+      {
+        return neighbors.Remove(neighbor);
+      }
+      public bool RemoveAllNeighbors()
+      {
+        for (int i = 0; i < neighbors.Count-1; i++)
+        {
+            neighbors.RemoveAt(i);
+        }
+        return true;
+      }      
+    }  
+    public class Graph<T>
+    {
+      List<GraphNode<T>> nodes = new List<GraphNode<T>>();
+      public Graph(){}
+      public int Count{get{return nodes.Count;}}
+      public IList<GraphNode<T>> Nodes{get{return nodes.AsReadOnly();}}
+      public void Clear()
+      {
+        foreach (GraphNode<T> node in nodes)
+        {
+            node.RemoveAllNeighbors();
+        }
+        for (int i = 0; i < nodes.Count-1; i++)
+        {
+            nodes.RemoveAt(i);
+        }
+      }
+
+      public bool AddNode(T value)
+      {
+        if(Find(value)!= null)
+        {
+          return false; //duplicate value
+        }
+        else
+        {
+            nodes.Add(new GraphNode<T>(value));
+            return true;
+        }
+      }
+      public bool AddEdge(T value1,T value2)
+      {
+        GraphNode<T> node1 = Find(value1);
+        GraphNode<T> node2 = Find(value2);
+        if(node1 == null || node2 == null)
+        {
+          return false;
+        }
+        else if(node1.neighbors.Contains(node2))
+        {          
+          return false; //edge already exists
+        }
+        else
+        {
+            node1.AddNeighbor(node2);
+            node2.AddNeighbor(node1);
+            return true;
+        }
+      }
+      public bool RemoveNode(T value)
+      {
+        GraphNode<T> removeNode = Find(value);
+        if(removeNode == null)
+        {
+          return false;
+        }
+        else
+        {
+            nodes.Remove(removeNode);
+            foreach (GraphNode<T> node in nodes)
+            {
+                node.RemoveNeighbor(removeNode);
+            }
+            return true;
+        }
+      }
+      public bool RemoveEdge(T value1,T value2)
+      {
+        GraphNode<T> node1 = Find(value1);
+        GraphNode<T> node2 = Find(value2);
+        if(node1 == null || node2 == null)
+        {
+          return false;
+        }
+        else if(!node1.neighbors.Contains(node2))
+        {
+          return false; //edge already exists
+        }
+        else
+        {
+          node1.RemoveNeighbor(node2);
+          node2.RemoveNeighbor(node1);
+          return true;
+        }
+      }  
+      public GraphNode<T> Find(T value)
+      {
+        foreach (GraphNode<T> node in nodes)
+        {
+            if(node.Value.Equals(value))
+            {
+              return node;
+            }
+        }
+        return null;
+      } 
+    }
 
 }
